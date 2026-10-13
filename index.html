@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>坂道グループ ミーグリ＆サイン会管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nogi: { DEFAULT: '#731284', light: '#9b2ba8', dark: '#4c0b58', bg: '#2d0a34' },
+                        sakura: { DEFAULT: '#f18bb0', light: '#f6b2cb', dark: '#d95d88', bg: '#3a1725' },
+                        hinata: { DEFAULT: '#7cc7e8', light: '#a3d9f0', dark: '#4fa8d1', bg: '#132c3a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-20 select-none">
+
+    <header id="mainHeader" class="bg-nogi text-white shadow-lg sticky top-0 z-30 transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 py-2.5 flex justify-between items-center">
+            <h1 class="text-base font-bold flex items-center gap-2">
+                <i class="fa-solid fa-ticket-simple text-amber-300"></i>
+                <span>坂道ミーグリ＆サイン会管理</span>
+            </h1>
+            <div class="flex items-center gap-2">
+                <button onclick="openMemberManagerModal()" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition flex items-center gap-1.5" title="メンバー編集">
+                    <i class="fa-solid fa-users-gear text-amber-300"></i>
+                    <span class="hidden sm:inline">メンバー編集</span>
+                </button>
+                <button onclick="exportData()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs transition" title="データ保存">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button onclick="importDataPrompt()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs transition" title="データ復元">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-2 flex bg-black/20 text-xs font-semibold">
+            <button onclick="switchGroup('nogizaka')" id="tab-nogizaka" class="tab-btn flex-1 py-2 text-center transition border-b-2 border-transparent">
+                乃木坂46
+            </button>
+            <button onclick="switchGroup('sakurazaka')" id="tab-sakurazaka" class="tab-btn flex-1 py-2 text-center transition border-b-2 border-transparent">
+                櫻坂46
+            </button>
+            <button onclick="switchGroup('hinatazaka')" id="tab-hinatazaka" class="tab-btn flex-1 py-2 text-center transition border-b-2 border-transparent">
+                日向坂46
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-3 py-3 space-y-4">
+        <!-- Single Selection Toolbar -->
+        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="w-full sm:w-auto flex-1 flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-semibold whitespace-nowrap"><i class="fa-solid fa-compact-disc text-amber-400 mr-1"></i> シングル:</span>
+                <select id="singleDropdown" onchange="onSingleDropdownChange(this.value)" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none focus:border-indigo-500 font-medium">
+                </select>
+            </div>
+            <div class="w-full sm:w-auto flex items-center justify-end gap-2">
+                <button onclick="openSingleModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-plus text-[10px]"></i> 新規シングル追加
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard for selected single -->
+        <div id="singleDashboard" class="space-y-4"></div>
+
+        <!-- Empty State View -->
+        <div id="emptyState" class="hidden text-center py-12 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700">
+            <i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i>
+            <p class="text-xs font-medium text-slate-400">このグループに登録されているシングルはありません</p>
+            <p class="text-[10px] text-slate-500 mt-1">「新規シングル追加」ボタンから作品を登録してください</p>
+        </div>
+    </main>
+
+    <!-- Single Creation Modal -->
+    <div id="singleModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
+            <h3 class="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-compact-disc text-indigo-400"></i> シングル作品登録
+            </h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">作品番号（1st〜75th）</label>
+                    <select id="singleOrdinal" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-indigo-500">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">作品タイトル（自由記述）</label>
+                    <input type="text" id="singleTitle" placeholder="例: チートデイ" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-indigo-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-5">
+                <button onclick="closeSingleModal()" class="px-3 py-1.5 text-xs text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600">キャンセル</button>
+                <button onclick="saveSingle()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Creation Modal -->
+    <div id="eventModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
+            <h3 class="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-plus text-indigo-400"></i> イベント追加
+            </h3>
+            <input type="hidden" id="eventSingleId">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">開催形態</label>
+                    <select id="eventType" onchange="toggleVenueVisibility()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                        <option value="real">リアルミーグリ（対面＋サイン会）</option>
+                        <option value="online">オンラインミーグリ（ペアレーン可・サイン会無）</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">開催日付</label>
+                    <input type="date" id="eventDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">部制選択（デフォルト: 4部制）</label>
+                    <select id="eventParts" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                        <option value="4" selected>4部制 (1部〜4部)</option>
+                        <option value="5">5部制 (1部〜5部)</option>
+                    </select>
+                </div>
+                <div id="venueSection">
+                    <label class="block text-xs text-slate-400 mb-1">会場選択</label>
+                    <select id="eventVenueSelect" onchange="checkCustomVenue()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 mb-1.5">
+                        <option value="東京ビッグサイト">東京ビッグサイト</option>
+                        <option value="幕張メッセ">幕張メッセ</option>
+                        <option value="パシフィコ横浜">パシフィコ横浜</option>
+                        <option value="インテックス大阪">インテックス大阪</option>
+                        <option value="京都パルスプラザ">京都パルスプラザ</option>
+                        <option value="Aichi Sky Expo">Aichi Sky Expo</option>
+                        <option value="ポートメッセなごや">ポートメッセなごや</option>
+                        <option value="マリンメッセ福岡">マリンメッセ福岡</option>
+                        <option value="other">その他（自由記述）</option>
+                    </select>
+                    <input type="text" id="eventVenueCustom" placeholder="会場名を入力" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 hidden">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-5">
+                <button onclick="closeEventModal()" class="px-3 py-1.5 text-xs text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600">キャンセル</button>
+                <button onclick="saveEvent()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">作成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Cell Modal -->
+    <div id="cellModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-slate-100" id="cellModalTitle">枠エントリー設定</h3>
+                <button onclick="clearCellData()" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold">クリア</button>
+            </div>
+
+            <input type="hidden" id="cellSingleId">
+            <input type="hidden" id="cellEventId">
+            <input type="hidden" id="cellPartKey">
+            <input type="hidden" id="cellSlotIndex">
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">メンバー選択 (期別→五十音順)</label>
+                    <select id="cellMember1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 mb-1">
+                    </select>
+                    <div id="pairContainer" class="hidden mt-1.5">
+                        <label class="block text-[10px] text-slate-400 mb-1">ペアメンバー（オンライン専用）</label>
+                        <select id="cellMember2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Normal Ticket Counts (1-100) -->
+                <div id="normalTicketGroup">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">応募枚数 (1〜100)</label>
+                            <select id="cellApplied" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">当選枚数 (0〜100)</label>
+                            <select id="cellWon" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sign Ticket Counts (1口=3枚) -->
+                <div id="signTicketGroup" class="hidden">
+                    <div class="bg-purple-950/50 p-2.5 rounded-lg border border-purple-500/30 mb-2">
+                        <label class="block text-xs font-bold text-purple-300 mb-1">サイン会 応募口数 (1口 = 3枚)</label>
+                        <select id="cellSignUnits" onchange="recalcSignSheets()" class="w-full bg-slate-900 border border-purple-500/40 rounded-lg p-2 text-xs text-slate-100 font-bold">
+                        </select>
+                        <p class="text-[10px] text-purple-400/80 mt-1">※ 換算応募枚数: <span id="signCalcAppliedSheets" class="font-bold text-amber-300">3</span> 枚</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">当選口数（高々1口当選）</label>
+                        <select id="cellSignWonUnits" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                            <option value="0">0口 (0枚)</option>
+                            <option value="1">1口 (3枚)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Guarantee Checkbox -->
+                <div id="guaranteeToggleContainer" class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-200 block">保障・振替応募分</span>
+                        <span class="text-[10px] text-slate-400">総応募枚数から除外して保障残を計算</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="cellIsGuarantee" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-5">
+                <button onclick="closeCellModal()" class="px-3 py-1.5 text-xs text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600">キャンセル</button>
+                <button onclick="saveCellData()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Manager Modal -->
+    <div id="memberManagerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-amber-300"></i>
+                    <span id="memberManagerTitle">メンバー情報編集</span>
+                </h3>
+                <button onclick="closeMemberManagerModal()" class="text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/80 mb-3 space-y-2">
+                <div class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                    <i class="fa-solid fa-user-plus text-[10px]"></i> メンバー新規追加
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="newMemberGen" placeholder="期 (例: 5期生)" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
+                    <input type="text" id="newMemberName" placeholder="名前 (例: 井上和)" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
+                </div>
+                <button onclick="addNewMember()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 rounded-lg font-semibold shadow transition">
+                    追加登録
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-1.5 pr-1" id="memberManagerList">
+            </div>
+
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-700/80">
+                <button onclick="resetMembersToDefault()" class="text-[10px] text-rose-400 hover:text-rose-300 font-semibold">初期リストにリセット</button>
+                <button onclick="closeMemberManagerModal()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">完了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Strictly verified roster dataset with active members
+        // Nogizaka 6th Gen includes '愛宕心響', excludes '伊藤優羽'
+        // Sakurazaka 2nd Gen excludes '上村莉菜'
+        const DEFAULT_ROSTER = {
+            nogizaka: [
+                { id: 'n_3_1', gen: '3期生', name: '伊藤理々杏' }, { id: 'n_3_2', gen: '3期生', name: '岩本蓮加' },
+                { id: 'n_4_1', gen: '4期生', name: '遠藤さくら' }, { id: 'n_4_2', gen: '4期生', name: '賀喜遥香' }, { id: 'n_4_3', gen: '4期生', name: '金川紗耶' }, { id: 'n_4_4', gen: '4期生', name: '黒見明香' }, { id: 'n_4_5', gen: '4期生', name: '柴田柚菜' }, { id: 'n_4_6', gen: '4期生', name: '田村真佑' }, { id: 'n_4_7', gen: '4期生', name: '筒井あやめ' }, { id: 'n_4_8', gen: '4期生', name: '林瑠奈' }, { id: 'n_4_9', gen: '4期生', name: '弓木奈於' },
+                { id: 'n_5_1', gen: '5期生', name: '五百城茉央' }, { id: 'n_5_2', gen: '5期生', name: '池田瑛紗' }, { id: 'n_5_3', gen: '5期生', name: '一ノ瀬美空' }, { id: 'n_5_4', gen: '5期生', name: '井上和' }, { id: 'n_5_5', gen: '5期生', name: '岡本姫奈' }, { id: 'n_5_6', gen: '5期生', name: '小川彩' }, { id: 'n_5_7', gen: '5期生', name: '奥田いろは' }, { id: 'n_5_8', gen: '5期生', name: '川﨑桜' }, { id: 'n_5_9', gen: '5期生', name: '菅原咲月' }, { id: 'n_5_10', gen: '5期生', name: '冨里奈央' }, { id: 'n_5_11', gen: '5期生', name: '中西アルノ' },
+                { id: 'n_6_1', gen: '6期生', name: '愛宕心響' }, { id: 'n_6_2', gen: '6期生', name: '大越ひなの' }, { id: 'n_6_3', gen: '6期生', name: '海邉朱莉' }, { id: 'n_6_4', gen: '6期生', name: '小津玲奈' }, { id: 'n_6_5', gen: '6期生', name: '川端晃菜' }, { id: 'n_6_6', gen: '6期生', name: '瀬戸口心月' }, { id: 'n_6_7', gen: '6期生', name: '長嶋凛桜' }, { id: 'n_6_8', gen: '6期生', name: '増田三莉音' }, { id: 'n_6_9', gen: '6期生', name: '森平麗心' }, { id: 'n_6_10', gen: '6期生', name: '矢田萌華' }
+            ],
+            sakurazaka: [
+                { id: 's_2_1', gen: '2期生', name: '遠藤光莉' }, { id: 's_2_2', gen: '2期生', name: '大園玲' }, { id: 's_2_3', gen: '2期生', name: '大沼晶保' }, { id: 's_2_4', gen: '2期生', name: '幸阪茉里乃' }, { id: 's_2_5', gen: '2期生', name: '武元唯衣' }, { id: 's_2_6', gen: '2期生', name: '田村保乃' }, { id: 's_2_7', gen: '2期生', name: '藤吉夏鈴' }, { id: 's_2_8', gen: '2期生', name: '松田里奈' }, { id: 's_2_9', gen: '2期生', name: '森田ひかる' }, { id: 's_2_10', gen: '2期生', name: '守屋麗奈' }, { id: 's_2_11', gen: '2期生', name: '山﨑天' },
+                { id: 's_3_1', gen: '3期生', name: '石森璃花' }, { id: 's_3_2', gen: '3期生', name: '遠藤理子' }, { id: 's_3_3', gen: '3期生', name: '小田倉麗奈' }, { id: 's_3_4', gen: '3期生', name: '小島凪砂' }, { id: 's_3_5', gen: '3期生', name: '谷口愛季' }, { id: 's_3_6', gen: '3期生', name: '中嶋優月' }, { id: 's_3_7', gen: '3期生', name: '的野美青' }, { id: 's_3_8', gen: '3期生', name: '向井純葉' }, { id: 's_3_9', gen: '3期生', name: '村井優' }, { id: 's_3_10', gen: '3期生', name: '村山美羽' }, { id: 's_3_11', gen: '3期生', name: '山下瞳月' },
+                { id: 's_4_1', gen: '4期生', name: '浅井恋乃未' }, { id: 's_4_2', gen: '4期生', name: '稲熊ひな' }, { id: 's_4_3', gen: '4期生', name: '勝又春' }, { id: 's_4_4', gen: '4期生', name: '佐藤愛桜' }, { id: 's_4_5', gen: '4期生', name: '中川智尋' }, { id: 's_4_6', gen: '4期生', name: '松本和子' }, { id: 's_4_7', gen: '4期生', name: '目黒陽色' }, { id: 's_4_8', gen: '4期生', name: '山川宇衣' }, { id: 's_4_9', gen: '4期生', name: '山田桃実' }
+            ],
+            hinatazaka: [
+                { id: 'h_2_1', gen: '2期生', name: '金村美玖' }, { id: 'h_2_2', gen: '2期生', name: '小坂菜緒' },
+                { id: 'h_3_1', gen: '3期生', name: '上村ひなの' }, { id: 'h_3_2', gen: '3期生', name: '髙橋未来虹' }, { id: 'h_3_3', gen: '3期生', name: '森本茉莉' },
+                { id: 'h_4_1', gen: '4期生', name: '石塚瑶季' }, { id: 'h_4_2', gen: '4期生', name: '小西夏菜実' }, { id: 'h_4_3', gen: '4期生', name: '清水理央' }, { id: 'h_4_4', gen: '4期生', name: '正源司陽子' }, { id: 'h_4_5', gen: '4期生', name: '竹内希来里' }, { id: 'h_4_6', gen: '4期生', name: '平尾帆夏' }, { id: 'h_4_7', gen: '4期生', name: '平岡海月' }, { id: 'h_4_8', gen: '4期生', name: '藤嶌果歩' }, { id: 'h_4_9', gen: '4期生', name: '宮地すみれ' }, { id: 'h_4_10', gen: '4期生', name: '山下葉留花' }, { id: 'h_4_11', gen: '4期生', name: '渡辺莉奈' },
+                { id: 'h_5_1', gen: '5期生', name: '大田美月' }, { id: 'h_5_2', gen: '5期生', name: '大野愛実' }, { id: 'h_5_3', gen: '5期生', name: '片山紗希' }, { id: 'h_5_4', gen: '5期生', name: '蔵盛妃那乃' }, { id: 'h_5_5', gen: '5期生', name: '坂井新奈' }, { id: 'h_5_6', gen: '5期生', name: '佐藤優羽' }, { id: 'h_5_7', gen: '5期生', name: '下田衣珠季' }, { id: 'h_5_8', gen: '5期生', name: '高井俐香' }, { id: 'h_5_9', gen: '5期生', name: '鶴崎仁香' }, { id: 'h_5_10', gen: '5期生', name: '松尾桜' }
+            ]
+        };
+
+        const GROUP_THEME = {
+            nogizaka: { name: "乃木坂46", headerClass: "bg-nogi" },
+            sakurazaka: { name: "櫻坂46", headerClass: "bg-sakura" },
+            hinatazaka: { name: "日向坂46", headerClass: "bg-hinata" }
+        };
+
+        let appState = {
+            currentGroup: 'nogizaka',
+            selectedSingleId: null,
+            rosters: JSON.parse(JSON.stringify(DEFAULT_ROSTER)),
+            singles: []
+        };
+
+        window.onload = function() {
+            loadLocalStorage();
+            setupOrdinalOptions();
+            setupCountOptions();
+            switchGroup(appState.currentGroup || 'nogizaka');
+        };
+
+        function loadLocalStorage() {
+            const raw = localStorage.getItem('sakamichi_mg_v7_data');
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    appState.currentGroup = parsed.currentGroup || 'nogizaka';
+                    appState.selectedSingleId = parsed.selectedSingleId || null;
+                    appState.singles = parsed.singles || [];
+                    if (parsed.rosters) appState.rosters = parsed.rosters;
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function saveLocalStorage() {
+            localStorage.setItem('sakamichi_mg_v7_data', JSON.stringify(appState));
+        }
+
+        function getOrdinalSuffix(i) {
+            let j = i % 10, k = i % 100;
+            if (j == 1 && k != 11) return i + "st";
+            if (j == 2 && k != 12) return i + "nd";
+            if (j == 3 && k != 13) return i + "rd";
+            return i + "th";
+        }
+
+        function setupOrdinalOptions() {
+            const sel = document.getElementById('singleOrdinal');
+            sel.innerHTML = '';
+            for (let i = 1; i <= 75; i++) {
+                const ord = getOrdinalSuffix(i);
+                sel.appendChild(new Option(`${ord} Single`, ord));
+            }
+        }
+
+        function setupCountOptions() {
+            const appSel = document.getElementById('cellApplied');
+            const wonSel = document.getElementById('cellWon');
+            appSel.innerHTML = ''; wonSel.innerHTML = '';
+
+            for (let i = 1; i <= 100; i++) appSel.appendChild(new Option(`${i} 枚`, i));
+            for (let i = 0; i <= 100; i++) wonSel.appendChild(new Option(`${i} 枚`, i));
+
+            const signUnitsSel = document.getElementById('cellSignUnits');
+            signUnitsSel.innerHTML = '';
+            for (let i = 1; i <= 33; i++) signUnitsSel.appendChild(new Option(`${i} 口 (${i*3}枚)`, i));
+        }
+
+        function switchGroup(groupKey) {
+            appState.currentGroup = groupKey;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-white', 'text-white', 'font-bold');
+                btn.classList.add('border-transparent', 'text-white/70');
+            });
+
+            const activeBtn = document.getElementById(`tab-${groupKey}`);
+            if (activeBtn) activeBtn.classList.add('border-white', 'text-white', 'font-bold');
+
+            const header = document.getElementById('mainHeader');
+            header.className = `${GROUP_THEME[groupKey].headerClass} text-white shadow-lg sticky top-0 z-30 transition-colors duration-300`;
+
+            const groupSingles = appState.singles.filter(s => s.group === groupKey);
+            if (groupSingles.length > 0) {
+                const exists = groupSingles.some(s => s.id === appState.selectedSingleId);
+                if (!exists) {
+                    appState.selectedSingleId = groupSingles[0].id;
+                }
+            } else {
+                appState.selectedSingleId = null;
+            }
+
+            renderApp();
+            saveLocalStorage();
+        }
+
+        function onSingleDropdownChange(singleId) {
+            appState.selectedSingleId = singleId;
+            renderApp();
+            saveLocalStorage();
+        }
+
+        // Strictly exclude Sign session losses from total lost and guarantee remaining calculation
+        function calculateSingleTotals(single) {
+            let regAppliedNoGuarantee = 0;
+            let regWon = 0;
+            let regGuaranteeApplied = 0;
+
+            let signApplied = 0;
+            let signWon = 0;
+
+            (single.events || []).forEach(ev => {
+                Object.entries(ev.entries || {}).forEach(([key, entry]) => {
+                    if (!entry) return;
+                    const isSign = key.startsWith('sign-');
+                    if (isSign) {
+                        const sApp = (entry.units || 0) * 3;
+                        const sWon = (entry.wonUnits || 0) * 3;
+                        signApplied += sApp;
+                        signWon += sWon;
+                    } else {
+                        const app = parseInt(entry.app) || 0;
+                        const won = parseInt(entry.won) || 0;
+
+                        if (entry.isGuarantee) {
+                            regGuaranteeApplied += app;
+                        } else {
+                            regAppliedNoGuarantee += app;
+                        }
+                        regWon += won;
+                    }
+                });
+            });
+
+            const regLost = Math.max(0, regAppliedNoGuarantee - regWon);
+            const guaranteeRemaining = Math.max(0, regLost - regGuaranteeApplied);
+
+            const totalApp = regAppliedNoGuarantee + regGuaranteeApplied + signApplied;
+            const totalWon = regWon + signWon;
+            const totalLost = regLost; // Sign losses explicitly excluded
+
+            return { app: totalApp, won: totalWon, lost: totalLost, guarantee: guaranteeRemaining };
+        }
+
+        function renderApp() {
+            const dropdown = document.getElementById('singleDropdown');
+            const dashboard = document.getElementById('singleDashboard');
+            const emptyState = document.getElementById('emptyState');
+
+            const groupSingles = appState.singles.filter(s => s.group === appState.currentGroup);
+
+            dropdown.innerHTML = '';
+            if (groupSingles.length === 0) {
+                dropdown.innerHTML = '<option value="">-- シングルがありません --</option>';
+                dashboard.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            groupSingles.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.ordinal}「${s.title}」`;
+                dropdown.appendChild(opt);
+            });
+
+            if (!appState.selectedSingleId || !groupSingles.some(s => s.id === appState.selectedSingleId)) {
+                appState.selectedSingleId = groupSingles[0].id;
+            }
+            dropdown.value = appState.selectedSingleId;
+
+            const currentSingle = groupSingles.find(s => s.id === appState.selectedSingleId);
+            if (!currentSingle) {
+                dashboard.innerHTML = '';
+                return;
+            }
+
+            const totals = calculateSingleTotals(currentSingle);
+            let eventsHTML = '';
+            if (!currentSingle.events || currentSingle.events.length === 0) {
+                eventsHTML = `<p class="text-[11px] text-slate-500 py-6 text-center">このシングルにイベントが未登録です。「+ イベント追加」ボタンを押してください。</p>`;
+            } else {
+                eventsHTML = currentSingle.events.map(ev => renderEventGrid(currentSingle.id, ev)).join('');
+            }
+
+            dashboard.innerHTML = `
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md">
+                    <!-- Single Header & Action Buttons -->
+                    <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-700/80 flex justify-between items-center">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xs font-bold text-amber-400 bg-amber-950/50 border border-amber-500/30 px-2 py-0.5 rounded">${currentSingle.ordinal}</span>
+                            <h2 class="text-xs font-bold text-slate-100">${escapeHtml(currentSingle.title)}</h2>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openEventModal('${currentSingle.id}')" class="bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/30 text-[10px] px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-[9px]"></i> イベント追加
+                            </button>
+                            <button onclick="deleteSingle('${currentSingle.id}')" class="bg-rose-950/50 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> シングル削除
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Single Specific Top Aggregation Stats -->
+                    <div class="bg-slate-900/50 px-3 py-2.5 border-b border-slate-700/50 grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="bg-slate-800/70 py-1.5 px-1 rounded border border-slate-700/60">
+                            <div class="text-[9px] text-slate-400">応募数</div>
+                            <div class="font-bold text-sky-400 text-sm">${totals.app}</div>
+                        </div>
+                        <div class="bg-slate-800/70 py-1.5 px-1 rounded border border-slate-700/60">
+                            <div class="text-[9px] text-slate-400">当選数</div>
+                            <div class="font-bold text-emerald-400 text-sm">${totals.won}</div>
+                        </div>
+                        <div class="bg-slate-800/70 py-1.5 px-1 rounded border border-slate-700/60">
+                            <div class="text-[9px] text-slate-400">落選数</div>
+                            <div class="font-bold text-rose-400 text-sm">${totals.lost}</div>
+                        </div>
+                        <div class="bg-purple-950/40 py-1.5 px-1 rounded border border-purple-500/30">
+                            <div class="text-[9px] text-purple-300">保障残</div>
+                            <div class="font-bold text-purple-300 text-sm">${totals.guarantee}</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 space-y-3">
+                        ${eventsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEventGrid(singleId, event) {
+            const isReal = event.type === 'real';
+            const partCount = parseInt(event.parts) || 4;
+            const slots = [1, 2, 3, 4, 5];
+
+            let tableRows = '';
+            for (let p = 1; p <= partCount; p++) {
+                tableRows += renderGridRow(singleId, event.id, `${p}部`, `part-${p}`, slots, false);
+            }
+
+            if (isReal) {
+                tableRows += renderGridRow(singleId, event.id, "サイン会", "sign", slots, true);
+            }
+
+            return `
+                <div class="bg-slate-900/70 border border-slate-700/60 rounded-xl p-2.5">
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-bold ${isReal ? 'bg-orange-950/60 text-orange-300 border border-orange-500/30' : 'bg-cyan-950/60 text-cyan-300 border border-cyan-500/30'}">
+                                ${isReal ? 'リアル' : 'オンライン'}
+                            </span>
+                            <span class="font-semibold text-slate-200 text-[11px]">${event.date || '日付未定'}</span>
+                            ${isReal && event.venue ? `<span class="text-[10px] text-slate-400">@${escapeHtml(event.venue)}</span>` : ''}
+                        </div>
+                        <button onclick="deleteEvent('${singleId}', '${event.id}')" class="bg-rose-950/40 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> イベント削除
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse text-center text-xs">
+                            <thead>
+                                <tr class="text-[10px] text-slate-400 border-b border-slate-700/60">
+                                    <th class="py-1 w-12 font-normal">部＼枠</th>
+                                    ${slots.map(s => `<th class="py-1 font-normal">枠${s}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGridRow(singleId, eventId, rowLabel, partKey, slots, isSign) {
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = single ? single.events.find(e => e.id === eventId) : null;
+
+            const cellsHTML = slots.map(slot => {
+                const entryKey = `${partKey}-${slot}`;
+                const cellData = (event && event.entries) ? event.entries[entryKey] : null;
+
+                let content = `<span class="text-slate-600 text-[9px]">+ 追加</span>`;
+                let cellClass = "bg-slate-800/40 border-slate-700/50 hover:bg-slate-700/50";
+
+                if (cellData && (cellData.m1 || cellData.units > 0)) {
+                    let nameStr = escapeHtml(cellData.m1 || '');
+                    if (cellData.m2) nameStr += `/${escapeHtml(cellData.m2)}`;
+
+                    if (isSign) {
+                        const units = cellData.units || 0;
+                        const wonUnits = cellData.wonUnits || 0;
+                        content = `
+                            <div class="font-bold text-purple-200 truncate leading-tight text-[10px]">${nameStr}</div>
+                            <div class="text-[9px] text-purple-300 mt-0.5">${units}口(${units*3}枚)|当:${wonUnits}口</div>
+                        `;
+                        cellClass = "bg-purple-950/60 border-purple-500/40 text-purple-100";
+                    } else {
+                        const app = cellData.app || 0;
+                        const won = cellData.won || 0;
+                        const gDot = cellData.isGuarantee ? `<span class="inline-block w-1.5 h-1.5 rounded-full bg-purple-400" title="保障"></span>` : '';
+
+                        content = `
+                            <div class="font-bold text-slate-100 truncate leading-tight text-[10px] flex items-center justify-center gap-0.5">
+                                ${gDot}<span>${nameStr}</span>
+                            </div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">応:${app} / 当:${won}</div>
+                        `;
+                        cellClass = won > 0 ? "bg-emerald-950/50 border-emerald-500/40" : "bg-slate-800 border-slate-600/60";
+                    }
+                }
+
+                return `
+                    <td onclick="openCellModal('${singleId}', '${eventId}', '${partKey}', ${slot})"
+                        class="p-1 border text-center cursor-pointer transition rounded-md ${cellClass} h-11 w-1/5 min-w-[58px] align-middle">
+                        <div class="flex flex-col justify-center items-center h-full">
+                            ${content}
+                        </div>
+                    </td>
+                `;
+            }).join('');
+
+            const labelClass = isSign ? "bg-purple-900/40 text-purple-300 font-bold" : "text-slate-400 font-medium";
+
+            return `
+                <tr class="border-b border-slate-800/80">
+                    <td class="py-1 text-[10px] ${labelClass} text-center align-middle">${rowLabel}</td>
+                    ${cellsHTML}
+                </tr>
+            `;
+        }
+
+        function openSingleModal() {
+            document.getElementById('singleTitle').value = '';
+            document.getElementById('singleModal').classList.remove('hidden');
+        }
+
+        function closeSingleModal() {
+            document.getElementById('singleModal').classList.add('hidden');
+        }
+
+        function saveSingle() {
+            const ordinal = document.getElementById('singleOrdinal').value;
+            const title = document.getElementById('singleTitle').value.trim() || `${ordinal} Single`;
+
+            const newSingle = {
+                id: 's_' + Date.now(),
+                group: appState.currentGroup,
+                ordinal: ordinal,
+                title: title,
+                events: []
+            };
+
+            appState.singles.push(newSingle);
+            appState.selectedSingleId = newSingle.id;
+            saveLocalStorage();
+            renderApp();
+            closeSingleModal();
+        }
+
+        function deleteSingle(singleId) {
+            if (confirm('このシングルと紐づくすべてのイベントデータを削除しますか？')) {
+                appState.singles = appState.singles.filter(s => s.id !== singleId);
+                const groupSingles = appState.singles.filter(s => s.group === appState.currentGroup);
+                appState.selectedSingleId = groupSingles.length > 0 ? groupSingles[0].id : null;
+                saveLocalStorage();
+                renderApp();
+            }
+        }
+
+        function openEventModal(singleId) {
+            document.getElementById('eventSingleId').value = singleId;
+            document.getElementById('eventDate').valueAsDate = new Date();
+            document.getElementById('eventParts').value = "4";
+            document.getElementById('eventModal').classList.remove('hidden');
+            toggleVenueVisibility();
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+        }
+
+        function toggleVenueVisibility() {
+            const type = document.getElementById('eventType').value;
+            const sec = document.getElementById('venueSection');
+            if (type === 'online') {
+                sec.classList.add('hidden');
+            } else {
+                sec.classList.remove('hidden');
+            }
+        }
+
+        function checkCustomVenue() {
+            const select = document.getElementById('eventVenueSelect');
+            const customInput = document.getElementById('eventVenueCustom');
+            if (select.value === 'other') {
+                customInput.classList.remove('hidden');
+            } else {
+                customInput.classList.add('hidden');
+            }
+        }
+
+        function saveEvent() {
+            const singleId = document.getElementById('eventSingleId').value;
+            const type = document.getElementById('eventType').value;
+            const date = document.getElementById('eventDate').value;
+            const parts = document.getElementById('eventParts').value;
+
+            let venue = '';
+            if (type === 'real') {
+                const vSel = document.getElementById('eventVenueSelect').value;
+                venue = (vSel === 'other') ? document.getElementById('eventVenueCustom').value : vSel;
+            }
+
+            const single = appState.singles.find(s => s.id === singleId);
+            if (single) {
+                if (!single.events) single.events = [];
+                single.events.push({
+                    id: 'e_' + Date.now(),
+                    type: type,
+                    date: date,
+                    parts: parts,
+                    venue: venue,
+                    entries: {}
+                });
+                saveLocalStorage();
+                renderApp();
+            }
+            closeEventModal();
+        }
+
+        function deleteEvent(singleId, eventId) {
+            if (confirm('このイベントを削除しますか？')) {
+                const single = appState.singles.find(s => s.id === singleId);
+                if (single) {
+                    single.events = single.events.filter(e => e.id !== eventId);
+                    saveLocalStorage();
+                    renderApp();
+                }
+            }
+        }
+
+        function openCellModal(singleId, eventId, partKey, slotIndex) {
+            document.getElementById('cellSingleId').value = singleId;
+            document.getElementById('cellEventId').value = eventId;
+            document.getElementById('cellPartKey').value = partKey;
+            document.getElementById('cellSlotIndex').value = slotIndex;
+
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = single.events.find(e => e.id === eventId);
+            const entryKey = `${partKey}-${slotIndex}`;
+            const cellData = (event.entries && event.entries[entryKey]) ? event.entries[entryKey] : {};
+
+            const isSign = (partKey === 'sign');
+            const isOnline = (event.type === 'online');
+
+            document.getElementById('cellModalTitle').textContent = `${isSign ? 'リアルサイン会' : partKey} - 枠${slotIndex} 設定`;
+
+            const m1Sel = document.getElementById('cellMember1');
+            const m2Sel = document.getElementById('cellMember2');
+            m1Sel.innerHTML = '<option value="">-- メンバー選択 --</option>';
+            m2Sel.innerHTML = '<option value="">-- ペア選択なし --</option>';
+
+            const roster = appState.rosters[appState.currentGroup] || [];
+            roster.forEach(m => {
+                const optText = `[${m.gen}] ${m.name}`;
+                m1Sel.appendChild(new Option(optText, m.name));
+                m2Sel.appendChild(new Option(optText, m.name));
+            });
+
+            m1Sel.value = cellData.m1 || '';
+            m2Sel.value = cellData.m2 || '';
+
+            const pairContainer = document.getElementById('pairContainer');
+            if (isOnline && !isSign) {
+                pairContainer.classList.remove('hidden');
+            } else {
+                pairContainer.classList.add('hidden');
+            }
+
+            const normalGrp = document.getElementById('normalTicketGroup');
+            const signGrp = document.getElementById('signTicketGroup');
+            const guaranteeContainer = document.getElementById('guaranteeToggleContainer');
+
+            if (isSign) {
+                normalGrp.classList.add('hidden');
+                signGrp.classList.remove('hidden');
+                guaranteeContainer.classList.add('hidden');
+                document.getElementById('cellSignUnits').value = cellData.units || 1;
+                document.getElementById('cellSignWonUnits').value = cellData.wonUnits || 0;
+                recalcSignSheets();
+            } else {
+                normalGrp.classList.remove('hidden');
+                signGrp.classList.add('hidden');
+                guaranteeContainer.classList.remove('hidden');
+                document.getElementById('cellApplied').value = cellData.app || 1;
+                document.getElementById('cellWon').value = cellData.won || 0;
+                document.getElementById('cellIsGuarantee').checked = !!cellData.isGuarantee;
+            }
+
+            document.getElementById('cellModal').classList.remove('hidden');
+        }
+
+        function closeCellModal() {
+            document.getElementById('cellModal').classList.add('hidden');
+        }
+
+        function recalcSignSheets() {
+            const units = parseInt(document.getElementById('cellSignUnits').value) || 0;
+            document.getElementById('signCalcAppliedSheets').textContent = units * 3;
+        }
+
+        function saveCellData() {
+            const singleId = document.getElementById('cellSingleId').value;
+            const eventId = document.getElementById('cellEventId').value;
+            const partKey = document.getElementById('cellPartKey').value;
+            const slotIndex = document.getElementById('cellSlotIndex').value;
+
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = single.events.find(e => e.id === eventId);
+            const entryKey = `${partKey}-${slotIndex}`;
+
+            const isSign = (partKey === 'sign');
+            if (!event.entries) event.entries = {};
+
+            const m1 = document.getElementById('cellMember1').value;
+            const m2 = document.getElementById('cellMember2').value;
+
+            if (isSign) {
+                const units = parseInt(document.getElementById('cellSignUnits').value) || 0;
+                const wonUnits = parseInt(document.getElementById('cellSignWonUnits').value) || 0;
+                event.entries[entryKey] = {
+                    m1: m1,
+                    m2: '',
+                    units: units,
+                    wonUnits: wonUnits,
+                    app: units * 3,
+                    won: wonUnits * 3,
+                    isGuarantee: false
+                };
+            } else {
+                event.entries[entryKey] = {
+                    m1: m1,
+                    m2: m2,
+                    app: parseInt(document.getElementById('cellApplied').value) || 0,
+                    won: parseInt(document.getElementById('cellWon').value) || 0,
+                    isGuarantee: document.getElementById('cellIsGuarantee').checked
+                };
+            }
+
+            saveLocalStorage();
+            renderApp();
+            closeCellModal();
+        }
+
+        function clearCellData() {
+            const singleId = document.getElementById('cellSingleId').value;
+            const eventId = document.getElementById('cellEventId').value;
+            const partKey = document.getElementById('cellPartKey').value;
+            const slotIndex = document.getElementById('cellSlotIndex').value;
+
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = single.events.find(e => e.id === eventId);
+            const entryKey = `${partKey}-${slotIndex}`;
+
+            if (event.entries && event.entries[entryKey]) {
+                delete event.entries[entryKey];
+                saveLocalStorage();
+                renderApp();
+            }
+            closeCellModal();
+        }
+
+        function openMemberManagerModal() {
+            document.getElementById('memberManagerTitle').textContent = `${GROUP_THEME[appState.currentGroup].name} メンバー編集`;
+            renderMemberManagerList();
+            document.getElementById('memberManagerModal').classList.remove('hidden');
+        }
+
+        function closeMemberManagerModal() {
+            document.getElementById('memberManagerModal').classList.add('hidden');
+        }
+
+        function renderMemberManagerList() {
+            const listEl = document.getElementById('memberManagerList');
+            const roster = appState.rosters[appState.currentGroup] || [];
+
+            if (roster.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">メンバーデータがありません</p>';
+                return;
+            }
+
+            listEl.innerHTML = roster.map(m => `
+                <div class="bg-slate-900/60 border border-slate-700/60 rounded-lg p-2 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-1">
+                        <input type="text" value="${escapeHtml(m.gen)}" onchange="updateMemberField('${m.id}', 'gen', this.value)" class="w-16 bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded px-1.5 py-1">
+                        <input type="text" value="${escapeHtml(m.name)}" onchange="updateMemberField('${m.id}', 'name', this.value)" class="flex-1 bg-slate-800 border border-slate-700 text-slate-100 text-xs font-semibold rounded px-2 py-1">
+                    </div>
+                    <button onclick="deleteMember('${m.id}')" class="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/50 rounded transition" title="削除">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateMemberField(memberId, field, value) {
+            const roster = appState.rosters[appState.currentGroup];
+            const member = roster.find(m => m.id === memberId);
+            if (member) {
+                member[field] = value.trim();
+                saveLocalStorage();
+            }
+        }
+
+        function addNewMember() {
+            const gen = document.getElementById('newMemberGen').value.trim();
+            const name = document.getElementById('newMemberName').value.trim();
+
+            if (!name) {
+                alert('メンバー名を入力してください');
+                return;
+            }
+
+            const newMember = {
+                id: 'm_' + Date.now(),
+                gen: gen || '期不明',
+                name: name
+            };
+
+            if (!appState.rosters[appState.currentGroup]) appState.rosters[appState.currentGroup] = [];
+            appState.rosters[appState.currentGroup].push(newMember);
+
+            document.getElementById('newMemberGen').value = '';
+            document.getElementById('newMemberName').value = '';
+
+            saveLocalStorage();
+            renderMemberManagerList();
+        }
+
+        function deleteMember(memberId) {
+            if (confirm('このメンバーを削除しますか？')) {
+                appState.rosters[appState.currentGroup] = appState.rosters[appState.currentGroup].filter(m => m.id !== memberId);
+                saveLocalStorage();
+                renderMemberManagerList();
+            }
+        }
+
+        function resetMembersToDefault() {
+            if (confirm(`${GROUP_THEME[appState.currentGroup].name}のメンバーリストを公式標準初期データにリセットしますか？`)) {
+                appState.rosters[appState.currentGroup] = JSON.parse(JSON.stringify(DEFAULT_ROSTER[appState.currentGroup]));
+                saveLocalStorage();
+                renderMemberManagerList();
+            }
+        }
+
+        function exportData() {
+            const jsonStr = JSON.stringify(appState, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sakamichi_mg_data_${appState.currentGroup}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importDataPrompt() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        if (imported && imported.singles) {
+                            appState = imported;
+                            saveLocalStorage();
+                            switchGroup(appState.currentGroup || 'nogizaka');
+                        }
+                    } catch (err) {
+                        alert('JSONファイルの読み込みに失敗しました。');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
