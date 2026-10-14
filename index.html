@@ -66,13 +66,13 @@
         <!-- Single Selection Toolbar -->
         <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="w-full sm:w-auto flex-1 flex items-center gap-2">
-                <span class="text-xs text-slate-400 font-semibold whitespace-nowrap"><i class="fa-solid fa-compact-disc text-amber-400 mr-1"></i> シングル:</span>
+                <span class="text-xs text-slate-400 font-semibold whitespace-nowrap"><i class="fa-solid fa-compact-disc text-amber-400 mr-1"></i> 作品:</span>
                 <select id="singleDropdown" onchange="onSingleDropdownChange(this.value)" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none focus:border-indigo-500 font-medium">
                 </select>
             </div>
             <div class="w-full sm:w-auto flex items-center justify-end gap-2">
                 <button onclick="openSingleModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-plus text-[10px]"></i> 新規シングル追加
+                    <i class="fa-solid fa-plus text-[10px]"></i> 新規作品追加
                 </button>
             </div>
         </div>
@@ -83,8 +83,8 @@
         <!-- Empty State View -->
         <div id="emptyState" class="hidden text-center py-12 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700">
             <i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-2"></i>
-            <p class="text-xs font-medium text-slate-400">このグループに登録されているシングルはありません</p>
-            <p class="text-[10px] text-slate-500 mt-1">「新規シングル追加」ボタンから作品を登録してください</p>
+            <p class="text-xs font-medium text-slate-400">このグループに登録されている作品はありません</p>
+            <p class="text-[10px] text-slate-500 mt-1">「新規作品追加」ボタンからシングルまたはアルバムを登録してください</p>
         </div>
     </main>
 
@@ -92,16 +92,16 @@
     <div id="singleModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <h3 class="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-compact-disc text-indigo-400"></i> シングル作品登録
+                <i class="fa-solid fa-compact-disc text-indigo-400"></i> 作品登録
             </h3>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">作品番号（1st〜75th）</label>
+                    <label class="block text-xs text-slate-400 mb-1">作品番号・種別</label>
                     <select id="singleOrdinal" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-indigo-500">
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">作品タイトル（自由記述）</label>
+                    <label class="block text-xs text-slate-400 mb-1">作品タイトル</label>
                     <input type="text" id="singleTitle" placeholder="例: チートデイ" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 outline-none focus:border-indigo-500">
                 </div>
             </div>
@@ -112,19 +112,20 @@
         </div>
     </div>
 
-    <!-- Event Creation Modal -->
+    <!-- Event Creation Modal (National / Individual) -->
     <div id="eventModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <h3 class="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-calendar-plus text-indigo-400"></i> イベント追加
+                <i class="fa-solid fa-calendar-plus text-indigo-400"></i> <span id="eventModalHeaderTitle">イベント追加</span>
             </h3>
             <input type="hidden" id="eventSingleId">
+            <input type="hidden" id="eventModeType" value="national">
             <div class="space-y-3">
-                <div>
+                <div id="eventTypeContainer">
                     <label class="block text-xs text-slate-400 mb-1">開催形態</label>
                     <select id="eventType" onchange="toggleVenueVisibility()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
-                        <option value="real">リアルミーグリ（対面＋サイン会）</option>
-                        <option value="online">オンラインミーグリ（ペアレーン可・サイン会無）</option>
+                        <option value="real">リアルミーグリ</option>
+                        <option value="online">オンラインミーグリ</option>
                     </select>
                 </div>
                 <div>
@@ -132,7 +133,7 @@
                     <input type="date" id="eventDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">部制選択（デフォルト: 4部制）</label>
+                    <label class="block text-xs text-slate-400 mb-1">部制選択</label>
                     <select id="eventParts" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                         <option value="4" selected>4部制 (1部〜4部)</option>
                         <option value="5">5部制 (1部〜5部)</option>
@@ -149,7 +150,7 @@
                         <option value="Aichi Sky Expo">Aichi Sky Expo</option>
                         <option value="ポートメッセなごや">ポートメッセなごや</option>
                         <option value="マリンメッセ福岡">マリンメッセ福岡</option>
-                        <option value="other">その他（自由記述）</option>
+                        <option value="other">その他</option>
                     </select>
                     <input type="text" id="eventVenueCustom" placeholder="会場名を入力" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 hidden">
                 </div>
@@ -161,7 +162,7 @@
         </div>
     </div>
 
-    <!-- Grid Cell Modal -->
+    <!-- Grid Cell Modal (National) -->
     <div id="cellModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-3">
@@ -176,11 +177,11 @@
 
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">メンバー選択 (期別→五十音順)</label>
+                    <label class="block text-xs text-slate-400 mb-1">メンバー選択</label>
                     <select id="cellMember1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 mb-1">
                     </select>
                     <div id="pairContainer" class="hidden mt-1.5">
-                        <label class="block text-[10px] text-slate-400 mb-1">ペアメンバー（オンライン専用）</label>
+                        <label class="block text-[10px] text-slate-400 mb-1">ペアメンバー</label>
                         <select id="cellMember2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                         </select>
                     </div>
@@ -190,28 +191,28 @@
                 <div id="normalTicketGroup">
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">応募枚数 (1〜100)</label>
+                            <label class="block text-xs text-slate-400 mb-1">応募枚数</label>
                             <select id="cellApplied" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">当選枚数 (0〜100)</label>
+                            <label class="block text-xs text-slate-400 mb-1">当選枚数</label>
                             <select id="cellWon" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sign Ticket Counts (1口=3枚) -->
+                <!-- Sign Ticket Counts -->
                 <div id="signTicketGroup" class="hidden">
                     <div class="bg-purple-950/50 p-2.5 rounded-lg border border-purple-500/30 mb-2">
-                        <label class="block text-xs font-bold text-purple-300 mb-1">サイン会 応募口数 (1口 = 3枚)</label>
+                        <label class="block text-xs font-bold text-purple-300 mb-1">サイン会 応募口数</label>
                         <select id="cellSignUnits" onchange="recalcSignSheets()" class="w-full bg-slate-900 border border-purple-500/40 rounded-lg p-2 text-xs text-slate-100 font-bold">
                         </select>
-                        <p class="text-[10px] text-purple-400/80 mt-1">※ 換算応募枚数: <span id="signCalcAppliedSheets" class="font-bold text-amber-300">3</span> 枚</p>
+                        <p class="text-[10px] text-purple-400/80 mt-1">換算応募枚数: <span id="signCalcAppliedSheets" class="font-bold text-amber-300">3</span> 枚</p>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">当選口数（高々1口当選）</label>
+                        <label class="block text-xs text-slate-400 mb-1">当選口数</label>
                         <select id="cellSignWonUnits" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
                             <option value="0">0口 (0枚)</option>
                             <option value="1">1口 (3枚)</option>
@@ -223,7 +224,7 @@
                 <div id="guaranteeToggleContainer" class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
                     <div>
                         <span class="text-xs font-semibold text-slate-200 block">保障・振替応募分</span>
-                        <span class="text-[10px] text-slate-400">総応募枚数から除外して保障残を計算</span>
+                        <span class="text-[10px] text-slate-400">総応募数から除外して保障残を計算</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="cellIsGuarantee" class="sr-only peer">
@@ -235,6 +236,48 @@
             <div class="flex justify-end gap-2 mt-5">
                 <button onclick="closeCellModal()" class="px-3 py-1.5 text-xs text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600">キャンセル</button>
                 <button onclick="saveCellData()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Cell Modal (Individual) -->
+    <div id="indivCellModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-100" id="indivCellModalTitle">個別ミーグリ 応募登録</h3>
+                    <p class="text-[10px] text-indigo-300" id="indivCellModalSub"></p>
+                </div>
+                <button onclick="clearIndivCellData()" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold">全クリア</button>
+            </div>
+
+            <input type="hidden" id="indivSingleId">
+            <input type="hidden" id="indivEventId">
+            <input type="hidden" id="indivPartKey">
+            <input type="hidden" id="indivSlotIndex">
+
+            <div class="mb-3">
+                <label class="block text-xs text-slate-400 mb-1">メンバー選択</label>
+                <select id="indivMemberSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200">
+                </select>
+            </div>
+
+            <!-- Rounds list -->
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="indivRoundsContainer">
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-slate-700/80 flex items-center justify-between">
+                <button onclick="addIndivRound()" id="addRoundBtn" class="bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/30 text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus text-[10px]"></i> エントリー追加
+                </button>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400">合計当選: <span id="indivModalTotalWon" class="font-bold text-emerald-400 text-xs">0</span> 枚</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-700/80">
+                <button onclick="closeIndivCellModal()" class="px-3 py-1.5 text-xs text-slate-400 bg-slate-700 rounded-lg hover:bg-slate-600">キャンセル</button>
+                <button onclick="saveIndivCellData()" class="px-4 py-1.5 text-xs text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-500 shadow">保存</button>
             </div>
         </div>
     </div>
@@ -257,8 +300,8 @@
                     <i class="fa-solid fa-user-plus text-[10px]"></i> メンバー新規追加
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="newMemberGen" placeholder="期 (例: 5期生)" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
-                    <input type="text" id="newMemberName" placeholder="名前 (例: 井上和)" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
+                    <input type="text" id="newMemberGen" placeholder="期" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
+                    <input type="text" id="newMemberName" placeholder="名前" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 outline-none">
                 </div>
                 <button onclick="addNewMember()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 rounded-lg font-semibold shadow transition">
                     追加登録
@@ -276,9 +319,6 @@
     </div>
 
     <script>
-        // Strictly verified roster dataset with active members
-        // Nogizaka 6th Gen includes '愛宕心響', excludes '伊藤優羽'
-        // Sakurazaka 2nd Gen excludes '上村莉菜'
         const DEFAULT_ROSTER = {
             nogizaka: [
                 { id: 'n_3_1', gen: '3期生', name: '伊藤理々杏' }, { id: 'n_3_2', gen: '3期生', name: '岩本蓮加' },
@@ -312,6 +352,11 @@
             singles: []
         };
 
+        let indivModalState = {
+            m1: '',
+            rounds: []
+        };
+
         window.onload = function() {
             loadLocalStorage();
             setupOrdinalOptions();
@@ -320,7 +365,7 @@
         };
 
         function loadLocalStorage() {
-            const raw = localStorage.getItem('sakamichi_mg_v7_data');
+            const raw = localStorage.getItem('sakamichi_mg_v9_data') || localStorage.getItem('sakamichi_mg_v8_data') || localStorage.getItem('sakamichi_mg_v7_data');
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
@@ -333,7 +378,7 @@
         }
 
         function saveLocalStorage() {
-            localStorage.setItem('sakamichi_mg_v7_data', JSON.stringify(appState));
+            localStorage.setItem('sakamichi_mg_v9_data', JSON.stringify(appState));
         }
 
         function getOrdinalSuffix(i) {
@@ -347,10 +392,24 @@
         function setupOrdinalOptions() {
             const sel = document.getElementById('singleOrdinal');
             sel.innerHTML = '';
+            
+            const optGroupSingle = document.createElement('optgroup');
+            optGroupSingle.label = 'シングル';
             for (let i = 1; i <= 75; i++) {
                 const ord = getOrdinalSuffix(i);
-                sel.appendChild(new Option(`${ord} Single`, ord));
+                const opt = new Option(`${ord} Single`, ord);
+                optGroupSingle.appendChild(opt);
             }
+            sel.appendChild(optGroupSingle);
+
+            const optGroupAlbum = document.createElement('optgroup');
+            optGroupAlbum.label = 'アルバム';
+            for (let i = 1; i <= 20; i++) {
+                const ord = getOrdinalSuffix(i);
+                const opt = new Option(`${ord} Album`, `${ord} Album`);
+                optGroupAlbum.appendChild(opt);
+            }
+            sel.appendChild(optGroupAlbum);
         }
 
         function setupCountOptions() {
@@ -400,44 +459,73 @@
             saveLocalStorage();
         }
 
-        // Strictly exclude Sign session losses from total lost and guarantee remaining calculation
-        function calculateSingleTotals(single) {
-            let regAppliedNoGuarantee = 0;
-            let regWon = 0;
-            let regGuaranteeApplied = 0;
+        function switchViewMode(singleId, mode) {
+            const single = appState.singles.find(s => s.id === singleId);
+            if (single) {
+                single.activeMode = mode;
+                saveLocalStorage();
+                renderApp();
+            }
+        }
 
-            let signApplied = 0;
-            let signWon = 0;
+        function calculateSingleTotals(single, mode) {
+            let totalApp = 0;
+            let totalWon = 0;
+            let totalLost = 0;
+            let guaranteeRemaining = 0;
 
-            (single.events || []).forEach(ev => {
-                Object.entries(ev.entries || {}).forEach(([key, entry]) => {
-                    if (!entry) return;
-                    const isSign = key.startsWith('sign-');
-                    if (isSign) {
-                        const sApp = (entry.units || 0) * 3;
-                        const sWon = (entry.wonUnits || 0) * 3;
-                        signApplied += sApp;
-                        signWon += sWon;
-                    } else {
-                        const app = parseInt(entry.app) || 0;
-                        const won = parseInt(entry.won) || 0;
-
-                        if (entry.isGuarantee) {
-                            regGuaranteeApplied += app;
-                        } else {
-                            regAppliedNoGuarantee += app;
-                        }
-                        regWon += won;
-                    }
+            if (mode === 'individual') {
+                (single.indivEvents || []).forEach(ev => {
+                    Object.values(ev.entries || {}).forEach(entry => {
+                        if (!entry || !entry.rounds) return;
+                        entry.rounds.forEach(r => {
+                            const app = parseInt(r.app) || 0;
+                            const won = parseInt(r.won) || 0;
+                            totalApp += app;
+                            totalWon += won;
+                            totalLost += Math.max(0, app - won);
+                        });
+                    });
                 });
-            });
+            } else {
+                let regAppliedNoGuarantee = 0;
+                let regWon = 0;
+                let regLostNoGuarantee = 0;
+                let regGuaranteeApplied = 0;
+                let signApplied = 0;
+                let signWon = 0;
 
-            const regLost = Math.max(0, regAppliedNoGuarantee - regWon);
-            const guaranteeRemaining = Math.max(0, regLost - regGuaranteeApplied);
+                (single.events || []).forEach(ev => {
+                    Object.entries(ev.entries || {}).forEach(([key, entry]) => {
+                        if (!entry) return;
+                        const isSign = key.startsWith('sign-');
+                        if (isSign) {
+                            const sApp = (entry.units || 0) * 3;
+                            const sWon = (entry.wonUnits || 0) * 3;
+                            signApplied += sApp;
+                            signWon += sWon;
+                        } else {
+                            const app = parseInt(entry.app) || 0;
+                            const won = parseInt(entry.won) || 0;
 
-            const totalApp = regAppliedNoGuarantee + regGuaranteeApplied + signApplied;
-            const totalWon = regWon + signWon;
-            const totalLost = regLost; // Sign losses explicitly excluded
+                            if (entry.isGuarantee) {
+                                regGuaranteeApplied += app;
+                            } else {
+                                regAppliedNoGuarantee += app;
+                                regLostNoGuarantee += Math.max(0, app - won);
+                            }
+                            regWon += won;
+                        }
+                    });
+                });
+
+                const regLost = regLostNoGuarantee;
+                guaranteeRemaining = Math.max(0, regLostNoGuarantee - regGuaranteeApplied);
+
+                totalApp = regAppliedNoGuarantee + signApplied;
+                totalWon = regWon + signWon;
+                totalLost = regLost;
+            }
 
             return { app: totalApp, won: totalWon, lost: totalLost, guarantee: guaranteeRemaining };
         }
@@ -451,7 +539,7 @@
 
             dropdown.innerHTML = '';
             if (groupSingles.length === 0) {
-                dropdown.innerHTML = '<option value="">-- シングルがありません --</option>';
+                dropdown.innerHTML = '<option value="">-- 作品がありません --</option>';
                 dashboard.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
@@ -476,34 +564,60 @@
                 return;
             }
 
-            const totals = calculateSingleTotals(currentSingle);
-            let eventsHTML = '';
-            if (!currentSingle.events || currentSingle.events.length === 0) {
-                eventsHTML = `<p class="text-[11px] text-slate-500 py-6 text-center">このシングルにイベントが未登録です。「+ イベント追加」ボタンを押してください。</p>`;
+            const mode = currentSingle.activeMode || 'national';
+            const totals = calculateSingleTotals(currentSingle, mode);
+
+            let mainContentHTML = '';
+            if (mode === 'national') {
+                if (!currentSingle.events || currentSingle.events.length === 0) {
+                    mainContentHTML = `<p class="text-[11px] text-slate-500 py-6 text-center">この作品にイベントが未登録です。「+ イベント追加」ボタンを押してください。</p>`;
+                } else {
+                    mainContentHTML = currentSingle.events.map(ev => renderEventGrid(currentSingle.id, ev)).join('');
+                }
             } else {
-                eventsHTML = currentSingle.events.map(ev => renderEventGrid(currentSingle.id, ev)).join('');
+                if (!currentSingle.indivEvents || currentSingle.indivEvents.length === 0) {
+                    mainContentHTML = `<p class="text-[11px] text-slate-500 py-6 text-center">個別の日程が未登録です。「+ 日程追加」ボタンを押してください。</p>`;
+                } else {
+                    mainContentHTML = currentSingle.indivEvents.map(ev => renderIndivEventGrid(currentSingle.id, ev)).join('');
+                }
             }
 
             dashboard.innerHTML = `
                 <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md">
-                    <!-- Single Header & Action Buttons -->
-                    <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-700/80 flex justify-between items-center">
+                    <!-- Single Header & Mode Switcher -->
+                    <div class="bg-slate-900/90 px-4 py-3 border-b border-slate-700/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div class="flex items-center gap-2.5">
                             <span class="text-xs font-bold text-amber-400 bg-amber-950/50 border border-amber-500/30 px-2 py-0.5 rounded">${currentSingle.ordinal}</span>
                             <h2 class="text-xs font-bold text-slate-100">${escapeHtml(currentSingle.title)}</h2>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="openEventModal('${currentSingle.id}')" class="bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/30 text-[10px] px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1">
-                                <i class="fa-solid fa-plus text-[9px]"></i> イベント追加
-                            </button>
-                            <button onclick="deleteSingle('${currentSingle.id}')" class="bg-rose-950/50 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> シングル削除
+                        
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                            <div class="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-lg border border-slate-700/80">
+                                <span class="text-[10px] text-slate-400 pl-1.5 font-medium"><i class="fa-solid fa-sliders text-indigo-400 mr-1"></i>種別:</span>
+                                <select onchange="switchViewMode('${currentSingle.id}', this.value)" class="bg-slate-800 text-xs font-bold text-indigo-300 border border-slate-700 rounded px-2 py-1 outline-none">
+                                    <option value="national" ${mode === 'national' ? 'selected' : ''}>全国版</option>
+                                    <option value="individual" ${mode === 'individual' ? 'selected' : ''}>個別</option>
+                                </select>
+                            </div>
+
+                            ${mode === 'national' ? `
+                                <button onclick="openEventModal('${currentSingle.id}', 'national')" class="bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/30 text-[10px] px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> イベント追加
+                                </button>
+                            ` : `
+                                <button onclick="openEventModal('${currentSingle.id}', 'individual')" class="bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/30 text-[10px] px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> 日程追加
+                                </button>
+                            `}
+
+                            <button onclick="deleteSingle('${currentSingle.id}')" class="bg-rose-950/50 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> 削除
                             </button>
                         </div>
                     </div>
 
-                    <!-- Single Specific Top Aggregation Stats -->
-                    <div class="bg-slate-900/50 px-3 py-2.5 border-b border-slate-700/50 grid grid-cols-4 gap-2 text-center text-xs">
+                    <!-- Aggregate Stats Bar -->
+                    <div class="bg-slate-900/50 px-3 py-2.5 border-b border-slate-700/50 grid ${mode === 'national' ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-center text-xs">
                         <div class="bg-slate-800/70 py-1.5 px-1 rounded border border-slate-700/60">
                             <div class="text-[9px] text-slate-400">応募数</div>
                             <div class="font-bold text-sky-400 text-sm">${totals.app}</div>
@@ -516,19 +630,22 @@
                             <div class="text-[9px] text-slate-400">落選数</div>
                             <div class="font-bold text-rose-400 text-sm">${totals.lost}</div>
                         </div>
+                        ${mode === 'national' ? `
                         <div class="bg-purple-950/40 py-1.5 px-1 rounded border border-purple-500/30">
                             <div class="text-[9px] text-purple-300">保障残</div>
                             <div class="font-bold text-purple-300 text-sm">${totals.guarantee}</div>
                         </div>
+                        ` : ''}
                     </div>
 
                     <div class="p-3 space-y-3">
-                        ${eventsHTML}
+                        ${mainContentHTML}
                     </div>
                 </div>
             `;
         }
 
+        // --- National View Renderers ---
         function renderEventGrid(singleId, event) {
             const isReal = event.type === 'real';
             const partCount = parseInt(event.parts) || 4;
@@ -553,7 +670,7 @@
                             <span class="font-semibold text-slate-200 text-[11px]">${event.date || '日付未定'}</span>
                             ${isReal && event.venue ? `<span class="text-[10px] text-slate-400">@${escapeHtml(event.venue)}</span>` : ''}
                         </div>
-                        <button onclick="deleteEvent('${singleId}', '${event.id}')" class="bg-rose-950/40 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded transition">
+                        <button onclick="deleteEvent('${singleId}', '${event.id}', 'national')" class="bg-rose-950/40 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded transition">
                             <i class="fa-solid fa-trash-can mr-1"></i> イベント削除
                         </button>
                     </div>
@@ -633,6 +750,280 @@
             `;
         }
 
+        // --- Individual View Renderers ---
+        function renderIndivEventGrid(singleId, event) {
+            const partCount = parseInt(event.parts) || 5;
+            const slots = [1, 2, 3, 4, 5];
+
+            let tableRows = '';
+            for (let p = 1; p <= partCount; p++) {
+                tableRows += renderIndivGridRow(singleId, event.id, `${p}部`, `part-${p}`, slots);
+            }
+
+            return `
+                <div class="bg-slate-900/70 border border-slate-700/60 rounded-xl p-2.5">
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-950/60 text-indigo-300 border border-indigo-500/30">
+                                個別オンライン (${partCount}部制)
+                            </span>
+                            <span class="font-semibold text-slate-200 text-[11px]">${event.date || '日付未定'}</span>
+                        </div>
+                        <button onclick="deleteEvent('${singleId}', '${event.id}', 'individual')" class="bg-rose-950/40 hover:bg-rose-900 text-rose-300 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> 日程削除
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse text-center text-xs">
+                            <thead>
+                                <tr class="text-[10px] text-slate-400 border-b border-slate-700/60">
+                                    <th class="py-1 w-12 font-normal">部＼枠</th>
+                                    ${slots.map(s => `<th class="py-1 font-normal">枠${s}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderIndivGridRow(singleId, eventId, rowLabel, partKey, slots) {
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = single ? (single.indivEvents || []).find(e => e.id === eventId) : null;
+
+            const cellsHTML = slots.map(slot => {
+                const entryKey = `${partKey}-${slot}`;
+                const cellData = (event && event.entries) ? event.entries[entryKey] : null;
+
+                let content = `<span class="text-slate-600 text-[9px]">+ 追加</span>`;
+                let cellClass = "bg-slate-800/40 border-slate-700/50 hover:bg-slate-700/50";
+
+                if (cellData && cellData.m1) {
+                    const nameStr = escapeHtml(cellData.m1);
+                    let totalWon = 0;
+                    if (cellData.rounds) {
+                        totalWon = cellData.rounds.reduce((acc, cur) => acc + (parseInt(cur.won) || 0), 0);
+                    }
+
+                    content = `
+                        <div class="font-bold text-slate-100 truncate leading-tight text-[10px]">${nameStr}</div>
+                        <div class="text-[9px] text-emerald-400 mt-0.5 font-semibold">当:${totalWon}枚</div>
+                    `;
+                    cellClass = totalWon > 0 ? "bg-emerald-950/50 border-emerald-500/40" : "bg-slate-800 border-slate-600/60";
+                }
+
+                return `
+                    <td onclick="openIndivCellModal('${singleId}', '${eventId}', '${partKey}', ${slot})"
+                        class="p-1 border text-center cursor-pointer transition rounded-md ${cellClass} h-11 w-1/5 min-w-[58px] align-middle">
+                        <div class="flex flex-col justify-center items-center h-full">
+                            ${content}
+                        </div>
+                    </td>
+                `;
+            }).join('');
+
+            return `
+                <tr class="border-b border-slate-800/80">
+                    <td class="py-1 text-[10px] text-cyan-300 font-bold text-center align-middle">${rowLabel}</td>
+                    ${cellsHTML}
+                </tr>
+            `;
+        }
+
+        // --- Individual Cell Modal Handling ---
+        function getMaxAppForRound(roundNum) {
+            if (roundNum === 1) return 3;
+            if (roundNum === 2) return 15;
+            return 50;
+        }
+
+        function openIndivCellModal(singleId, eventId, partKey, slotIndex) {
+            document.getElementById('indivSingleId').value = singleId;
+            document.getElementById('indivEventId').value = eventId;
+            document.getElementById('indivPartKey').value = partKey;
+            document.getElementById('indivSlotIndex').value = slotIndex;
+
+            const partNum = partKey.replace('part-', '');
+            document.getElementById('indivCellModalTitle').textContent = `個別オンライン ${partNum}部 - 枠${slotIndex} 登録`;
+
+            const mSel = document.getElementById('indivMemberSelect');
+            mSel.innerHTML = '<option value="">-- メンバー選択 --</option>';
+
+            const roster = appState.rosters[appState.currentGroup] || [];
+            roster.forEach(m => {
+                mSel.appendChild(new Option(`[${m.gen}] ${m.name}`, m.name));
+            });
+
+            const single = appState.singles.find(s => s.id === singleId);
+            const event = (single.indivEvents || []).find(e => e.id === eventId);
+            const entryKey = `${partKey}-${slotIndex}`;
+            const cellData = (event && event.entries && event.entries[entryKey]) ? event.entries[entryKey] : null;
+
+            if (cellData) {
+                indivModalState = {
+                    m1: cellData.m1 || '',
+                    rounds: cellData.rounds ? JSON.parse(JSON.stringify(cellData.rounds)) : []
+                };
+            } else {
+                indivModalState = {
+                    m1: '',
+                    rounds: [{ round: 1, app: 0, won: 0 }]
+                };
+            }
+
+            mSel.value = indivModalState.m1;
+            renderIndivRoundsList();
+
+            document.getElementById('indivCellModal').classList.remove('hidden');
+        }
+
+        function closeIndivCellModal() {
+            document.getElementById('indivCellModal').classList.add('hidden');
+        }
+
+        function renderIndivRoundsList() {
+            const container = document.getElementById('indivRoundsContainer');
+            container.innerHTML = '';
+
+            let totalWon = 0;
+
+            indivModalState.rounds.forEach((r, idx) => {
+                const roundNum = r.round || (idx + 1);
+                const maxApp = getMaxAppForRound(roundNum);
+
+                totalWon += parseInt(r.won) || 0;
+
+                let appOptionsHTML = '';
+                for (let i = 0; i <= maxApp; i++) {
+                    const sel = (parseInt(r.app) === i) ? 'selected' : '';
+                    appOptionsHTML += `<option value="${i}" ${sel}>${i} 枚</option>`;
+                }
+
+                let wonOptionsHTML = '';
+                const currentApp = parseInt(r.app) || 0;
+                for (let i = 0; i <= currentApp; i++) {
+                    const sel = (parseInt(r.won) === i) ? 'selected' : '';
+                    wonOptionsHTML += `<option value="${i}" ${sel}>${i} 枚</option>`;
+                }
+
+                const roundCard = document.createElement('div');
+                roundCard.className = "bg-slate-900/80 border border-slate-700 p-2.5 rounded-xl space-y-2";
+                roundCard.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-indigo-300">${roundNum}次応募</span>
+                        ${idx > 0 && idx === indivModalState.rounds.length - 1 ? `
+                            <button onclick="removeLastIndivRound()" class="text-[10px] text-rose-400 hover:text-rose-300">削除</button>
+                        ` : ''}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">応募数</label>
+                            <select onchange="updateIndivRoundVal(${idx}, 'app', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
+                                ${appOptionsHTML}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">当選数</label>
+                            <select onchange="updateIndivRoundVal(${idx}, 'won', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-100">
+                                ${wonOptionsHTML}
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(roundCard);
+            });
+
+            document.getElementById('indivModalTotalWon').textContent = totalWon;
+
+            const addBtn = document.getElementById('addRoundBtn');
+            if (indivModalState.rounds.length >= 15) {
+                addBtn.classList.add('hidden');
+            } else {
+                addBtn.classList.remove('hidden');
+            }
+        }
+
+        function updateIndivRoundVal(idx, field, val) {
+            const numVal = parseInt(val) || 0;
+            indivModalState.rounds[idx][field] = numVal;
+
+            if (field === 'app') {
+                if (indivModalState.rounds[idx].won > numVal) {
+                    indivModalState.rounds[idx].won = numVal;
+                }
+            }
+            renderIndivRoundsList();
+        }
+
+        function addIndivRound() {
+            if (indivModalState.rounds.length < 15) {
+                const nextRound = indivModalState.rounds.length + 1;
+                indivModalState.rounds.push({ round: nextRound, app: 0, won: 0 });
+                renderIndivRoundsList();
+            }
+        }
+
+        function removeLastIndivRound() {
+            if (indivModalState.rounds.length > 1) {
+                indivModalState.rounds.pop();
+                renderIndivRoundsList();
+            }
+        }
+
+        function saveIndivCellData() {
+            const singleId = document.getElementById('indivSingleId').value;
+            const eventId = document.getElementById('indivEventId').value;
+            const partKey = document.getElementById('indivPartKey').value;
+            const slotIndex = document.getElementById('indivSlotIndex').value;
+            const memberName = document.getElementById('indivMemberSelect').value;
+
+            const single = appState.singles.find(s => s.id === singleId);
+            if (!single) return;
+
+            const event = (single.indivEvents || []).find(e => e.id === eventId);
+            if (!event) return;
+
+            if (!event.entries) event.entries = {};
+            const entryKey = `${partKey}-${slotIndex}`;
+
+            if (!memberName && indivModalState.rounds.every(r => r.app === 0)) {
+                delete event.entries[entryKey];
+            } else {
+                event.entries[entryKey] = {
+                    m1: memberName,
+                    rounds: indivModalState.rounds
+                };
+            }
+
+            saveLocalStorage();
+            renderApp();
+            closeIndivCellModal();
+        }
+
+        function clearIndivCellData() {
+            const singleId = document.getElementById('indivSingleId').value;
+            const eventId = document.getElementById('indivEventId').value;
+            const partKey = document.getElementById('indivPartKey').value;
+            const slotIndex = document.getElementById('indivSlotIndex').value;
+
+            const single = appState.singles.find(s => s.id === singleId);
+            if (single && single.indivEvents) {
+                const event = single.indivEvents.find(e => e.id === eventId);
+                if (event && event.entries) {
+                    const entryKey = `${partKey}-${slotIndex}`;
+                    delete event.entries[entryKey];
+                    saveLocalStorage();
+                    renderApp();
+                }
+            }
+            closeIndivCellModal();
+        }
+
+        // --- Standard Single / Event Handlers ---
         function openSingleModal() {
             document.getElementById('singleTitle').value = '';
             document.getElementById('singleModal').classList.remove('hidden');
@@ -644,14 +1035,16 @@
 
         function saveSingle() {
             const ordinal = document.getElementById('singleOrdinal').value;
-            const title = document.getElementById('singleTitle').value.trim() || `${ordinal} Single`;
+            const title = document.getElementById('singleTitle').value.trim() || `${ordinal}`;
 
             const newSingle = {
                 id: 's_' + Date.now(),
                 group: appState.currentGroup,
                 ordinal: ordinal,
                 title: title,
-                events: []
+                activeMode: 'national',
+                events: [],
+                indivEvents: []
             };
 
             appState.singles.push(newSingle);
@@ -662,7 +1055,7 @@
         }
 
         function deleteSingle(singleId) {
-            if (confirm('このシングルと紐づくすべてのイベントデータを削除しますか？')) {
+            if (confirm('この作品と紐づくすべてのデータを削除しますか？')) {
                 appState.singles = appState.singles.filter(s => s.id !== singleId);
                 const groupSingles = appState.singles.filter(s => s.group === appState.currentGroup);
                 appState.selectedSingleId = groupSingles.length > 0 ? groupSingles[0].id : null;
@@ -671,12 +1064,28 @@
             }
         }
 
-        function openEventModal(singleId) {
+        function openEventModal(singleId, modeType) {
             document.getElementById('eventSingleId').value = singleId;
+            document.getElementById('eventModeType').value = modeType;
             document.getElementById('eventDate').valueAsDate = new Date();
-            document.getElementById('eventParts').value = "4";
+            
+            const headerTitleEl = document.getElementById('eventModalHeaderTitle');
+            const eventTypeContainer = document.getElementById('eventTypeContainer');
+            const venueSection = document.getElementById('venueSection');
+
+            if (modeType === 'individual') {
+                headerTitleEl.textContent = '個別 日程追加';
+                eventTypeContainer.classList.add('hidden');
+                venueSection.classList.add('hidden');
+                document.getElementById('eventParts').value = "5";
+            } else {
+                headerTitleEl.textContent = 'イベント追加';
+                eventTypeContainer.classList.remove('hidden');
+                document.getElementById('eventParts').value = "4";
+                toggleVenueVisibility();
+            }
+
             document.getElementById('eventModal').classList.remove('hidden');
-            toggleVenueVisibility();
         }
 
         function closeEventModal() {
@@ -705,18 +1114,29 @@
 
         function saveEvent() {
             const singleId = document.getElementById('eventSingleId').value;
-            const type = document.getElementById('eventType').value;
+            const modeType = document.getElementById('eventModeType').value;
             const date = document.getElementById('eventDate').value;
             const parts = document.getElementById('eventParts').value;
 
-            let venue = '';
-            if (type === 'real') {
-                const vSel = document.getElementById('eventVenueSelect').value;
-                venue = (vSel === 'other') ? document.getElementById('eventVenueCustom').value : vSel;
-            }
-
             const single = appState.singles.find(s => s.id === singleId);
-            if (single) {
+            if (!single) return;
+
+            if (modeType === 'individual') {
+                if (!single.indivEvents) single.indivEvents = [];
+                single.indivEvents.push({
+                    id: 'ie_' + Date.now(),
+                    date: date,
+                    parts: parts,
+                    entries: {}
+                });
+            } else {
+                const type = document.getElementById('eventType').value;
+                let venue = '';
+                if (type === 'real') {
+                    const vSel = document.getElementById('eventVenueSelect').value;
+                    venue = (vSel === 'other') ? document.getElementById('eventVenueCustom').value : vSel;
+                }
+
                 if (!single.events) single.events = [];
                 single.events.push({
                     id: 'e_' + Date.now(),
@@ -726,23 +1146,30 @@
                     venue: venue,
                     entries: {}
                 });
-                saveLocalStorage();
-                renderApp();
             }
+
+            saveLocalStorage();
+            renderApp();
             closeEventModal();
         }
 
-        function deleteEvent(singleId, eventId) {
-            if (confirm('このイベントを削除しますか？')) {
+        function deleteEvent(singleId, eventId, modeType) {
+            const msg = (modeType === 'individual') ? 'この日程を削除しますか？' : 'このイベントを削除しますか？';
+            if (confirm(msg)) {
                 const single = appState.singles.find(s => s.id === singleId);
                 if (single) {
-                    single.events = single.events.filter(e => e.id !== eventId);
+                    if (modeType === 'individual') {
+                        single.indivEvents = (single.indivEvents || []).filter(e => e.id !== eventId);
+                    } else {
+                        single.events = single.events.filter(e => e.id !== eventId);
+                    }
                     saveLocalStorage();
                     renderApp();
                 }
             }
         }
 
+        // --- National Cell Modal Handling ---
         function openCellModal(singleId, eventId, partKey, slotIndex) {
             document.getElementById('cellSingleId').value = singleId;
             document.getElementById('cellEventId').value = eventId;
@@ -874,6 +1301,7 @@
             closeCellModal();
         }
 
+        // --- Member Manager Handlers ---
         function openMemberManagerModal() {
             document.getElementById('memberManagerTitle').textContent = `${GROUP_THEME[appState.currentGroup].name} メンバー編集`;
             renderMemberManagerList();
@@ -949,7 +1377,7 @@
         }
 
         function resetMembersToDefault() {
-            if (confirm(`${GROUP_THEME[appState.currentGroup].name}のメンバーリストを公式標準初期データにリセットしますか？`)) {
+            if (confirm(`${GROUP_THEME[appState.currentGroup].name}のメンバーリストを初期データにリセットしますか？`)) {
                 appState.rosters[appState.currentGroup] = JSON.parse(JSON.stringify(DEFAULT_ROSTER[appState.currentGroup]));
                 saveLocalStorage();
                 renderMemberManagerList();
